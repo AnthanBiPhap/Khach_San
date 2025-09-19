@@ -15,6 +15,7 @@ export default function BookingPage() {
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
 
   const loadBookings = async (page = 1, limit = 10) => {
+    //bookingStatus
     try {
       setLoading(true);
       const res = await fetchBookings(page, limit);
