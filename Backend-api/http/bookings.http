@@ -1,0 +1,35 @@
+### Lấy tất cả bookings
+GET http://localhost:8080/api/v1/bookings
+Content-Type: application/json
+
+### Lấy booking theo ID
+GET http://localhost:8080/api/v1/bookings
+Content-Type: application/json
+
+### Tạo booking mới
+POST http://localhost:8080/api/v1/bookings
+Content-Type: application/json
+
+{
+  "customerId": "68cb70183c0249ce4ed2998f",  
+  "roomId": "68ca76e0df61ff9fa5f4ca97",     
+  "checkIn": "2025-09-20T14:00:00.000Z",
+  "checkOut": "2025-09-23T12:00:00.000Z",
+  "guests": 2,
+  "totalPrice": 2500000,
+  "paymentStatus": "pending",
+  "notes": "Khách yêu cầu giường phụ"
+}
+
+### Cập nhật booking
+PUT http://localhost:8080/api/v1/bookings
+Content-Type: application/json
+
+{
+  "paymentStatus": "paid",
+  "notes": "Khách đã thanh toán full"
+}
+
+### Xoá booking
+DELETE http://localhost:8080/api/v1/bookings
+Content-Type: application/json

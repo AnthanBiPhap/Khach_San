@@ -1,0 +1,13 @@
+
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com",
+    "password": "123456"
+}
+
+### get profile
+GET http://localhost:8080/api/v1/auth/get-profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OGNiNzAxODNjMDI0OWNlNGVkMjk5OGYiLCJlbWFpbCI6ImFkbWluQGdtYWlsLmNvbSIsImlhdCI6MTc1ODE2MzA1MiwiZXhwIjoxNzU4MjQ5NDUyfQ.nz-ob4MN0hUA0eUQ9phrcJE_Hv8AW29d7rY9o2l6oW0
