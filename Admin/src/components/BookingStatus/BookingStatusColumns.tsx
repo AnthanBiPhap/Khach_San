@@ -1,80 +1,60 @@
 import { Tag, Space } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import type { Booking } from "../../types/booking";
+import type { BookingStatusLog } from "../../types/bookingstatus";
 
-export const bookingColumns = (
-  handleEdit: (record: Booking) => void,
+export const bookingStatusColumns = (
+  handleEdit: (record: BookingStatusLog) => void,
   handleDelete: (id: string) => void
-): ColumnsType<Booking> => [
-//   {
-//     title: "Mã đặt phòng",
-//     dataIndex: "_id",
-//     key: "_id",
-//     render: (id) => <span>{id.substring(0, 8)}...</span>,
-//   },
+): ColumnsType<BookingStatusLog> => [
   {
-    title: "Khách hàng",
-    key: "customer",
+    title: "Booking",
+    key: "booking",
     render: (_, record) => (
       <div>
-        <div>{record.customerId?.fullName}</div>
-        <div style={{ color: "#888", fontSize: "12px" }}>
-          {record.customerId?.phoneNumber}
+        {/* <div>Mã: {record.bookingId?._id?.slice(0, 8)}...</div> */}
+        <div style={{ color: "#888", fontSize: 12 }}>
+          Nhận: {record.bookingId?.checkIn ? new Date(record.bookingId.checkIn).toLocaleString("vi-VN") : "-"}
+        </div>
+        <div style={{ color: "#888", fontSize: 12 }}>
+          Trả: {record.bookingId?.checkOut ? new Date(record.bookingId.checkOut).toLocaleString("vi-VN") : "-"}
         </div>
       </div>
     ),
   },
   {
-    title: "Phòng",
-    key: "room",
-    render: (_, record) => `Phòng ${record.roomId?.roomNumber}`,
-  },
-  {
-    title: "Ngày nhận/trả",
-    key: "dates",
+    title: "Người thao tác",
+    key: "actor",
     render: (_, record) => (
       <div>
-        <div>Nhận: {new Date(record.checkIn).toLocaleString("vi-VN")}</div>
-        <div>Trả: {new Date(record.checkOut).toLocaleString("vi-VN")}</div>
+        <div>{record.actorId?.fullName}</div>
+        <div style={{ color: "#888", fontSize: 12 }}>{record.actorId?.email}</div>
       </div>
     ),
   },
   {
-    title: "Số khách",
-    dataIndex: "guests",
-    key: "guests",
-    align: "center",
-  },
-  {
-    title: "Tổng tiền",
-    key: "totalPrice",
-    render: (_, record) =>
-      new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(record.totalPrice),
-  },
-  {
-    title: "Thanh toán",
-    dataIndex: "paymentStatus",
-    key: "paymentStatus",
-    render: (status) => {
-      const statusMap: Record<string, { color: string; text: string }> = {
-        pending: { color: "orange", text: "Chờ thanh toán" },
-        paid: { color: "green", text: "Đã thanh toán" },
-        refunded: { color: "blue", text: "Đã hoàn tiền" },
-        failed: { color: "red", text: "Thất bại" },
+    title: "Hành động",
+    dataIndex: "action",
+    key: "action",
+    render: (action: string) => {
+      const map: Record<string, { color: string; text: string }> = {
+        check_in: { color: "green", text: "Check-in" },
+        check_out: { color: "blue", text: "Check-out" },
+        cancel: { color: "red", text: "Hủy" },
+        extend: { color: "purple", text: "Gia hạn" },
+        extend_check_out: { color: "geekblue", text: "Lùi giờ trả" },
       };
-      const { color, text } = statusMap[status] || {
-        color: "default",
-        text: status,
-      };
-      return <Tag color={color}>{text}</Tag>;
+      const item = map[action] || { color: "default", text: action };
+      return <Tag color={item.color}>{item.text}</Tag>;
     },
   },
   {
-    title: "Hành động",
-    key: "action",
+    title: "Ghi chú",
+    dataIndex: "note",
+    key: "note",
+  },
+  {
+    title: "Thao tác",
+    key: "actions",
     render: (_, record) => (
       <Space>
         <a onClick={() => handleEdit(record)}>Chỉnh sửa</a>

@@ -3,6 +3,11 @@ export interface RoomType {
     name: string;
     pricePerNight: number;
     capacity: number;
+    description?: string;
+    amenities?: string[];
+    images?: string[];
+    createdAt?: string;
+    updatedAt?: string;
   }
   
   export interface Room {

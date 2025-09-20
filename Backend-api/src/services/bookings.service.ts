@@ -51,39 +51,69 @@ const getById = async (id: string) => {
 };
 
 const create = async (payload: any) => {
-    const booking = new Booking({
-      customerId: payload.customerId,
-      roomId: payload.roomId,
-      checkIn: payload.checkIn,
-      checkOut: payload.checkOut,
-      guests: payload.guests,
-      totalPrice: payload.totalPrice,
-      paymentStatus: payload.paymentStatus || "pending",
-      notes: payload.notes || "",
-    });
-  
-    const savedBooking = await booking.save();
-    await savedBooking.populate("customerId", "fullName email phoneNumber");
-    await savedBooking.populate("roomId", "roomNumber typeId");
-    return savedBooking;
-  };
-  
-  const updateById = async (id: string, payload: any) => {
-    const booking = await getById(id);
-  
-    const cleanUpdates = Object.fromEntries(
-      Object.entries(payload).filter(
-        ([, v]) => v !== "" && v !== null && v !== undefined
-      )
-    );
-  
-    Object.assign(booking, cleanUpdates);
-    const updatedBooking = await booking.save();
-    await updatedBooking.populate("customerId", "fullName email phoneNumber");
-    await updatedBooking.populate("roomId", "roomNumber typeId");
-    return updatedBooking;
-  };
-  
+  // Check phòng có bị trùng khoảng thời gian không
+  const conflict = await Booking.findOne({
+    roomId: payload.roomId,
+    status: { $nin: ["cancelled"] },
+    checkIn: { $lt: new Date(payload.checkOut) },
+    checkOut: { $gt: new Date(payload.checkIn) },
+  });
+
+  if (conflict) {
+    throw createError(400, "Phòng đã có người đặt trong khoảng thời gian này");
+  }
+
+  const booking = new Booking({
+    customerId: payload.customerId,
+    roomId: payload.roomId,
+    checkIn: payload.checkIn,
+    checkOut: payload.checkOut,
+    guests: payload.guests,
+    totalPrice: payload.totalPrice,
+    paymentStatus: payload.paymentStatus || "pending",
+    notes: payload.notes || "",
+    status: payload.status || "pending",
+    specialRequests: payload.specialRequests || "",
+  });
+
+  const savedBooking = await booking.save();
+  await savedBooking.populate("customerId", "fullName email phoneNumber");
+  await savedBooking.populate("roomId", "roomNumber typeId");
+  return savedBooking;
+};
+
+const updateById = async (id: string, payload: any) => {
+  const booking = await getById(id);
+
+  // Nếu có sửa ngày/room thì check trùng
+  const roomId = payload.roomId ?? booking.roomId;
+  const checkIn = payload.checkIn ?? booking.checkIn;
+  const checkOut = payload.checkOut ?? booking.checkOut;
+
+  const conflict = await Booking.findOne({
+    _id: { $ne: id },
+    roomId,
+    status: { $nin: ["cancelled"] },
+    checkIn: { $lt: new Date(checkOut) },
+    checkOut: { $gt: new Date(checkIn) },
+  });
+
+  if (conflict) {
+    throw createError(400, "Phòng đã có người đặt trong khoảng thời gian này");
+  }
+
+  const cleanUpdates = Object.fromEntries(
+    Object.entries(payload).filter(
+      ([, v]) => v !== "" && v !== null && v !== undefined
+    )
+  );
+
+  Object.assign(booking, cleanUpdates);
+  const updatedBooking = await booking.save();
+  await updatedBooking.populate("customerId", "fullName email phoneNumber");
+  await updatedBooking.populate("roomId", "roomNumber typeId");
+  return updatedBooking;
+};
 
 const deleteById = async (id: string) => {
   const booking = await getById(id);

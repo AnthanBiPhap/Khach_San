@@ -10,7 +10,7 @@ export const fetchBookings = async (page = 1, limit = 10) => {
     const { data } = response;
     
     return {
-      data: data?.bookings || [],
+      data: data?.logs || [],
       pagination: data?.pagination || { 
         page: data?.pagination?.page || page, 
         limit: data?.pagination?.limit || limit, 
@@ -35,5 +35,6 @@ export const deleteBooking = async (id: string) => {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error('Failed to delete booking');
-  return res.json();
+  // Backend returns 204 No Content. Avoid parsing JSON.
+  return true;
 };

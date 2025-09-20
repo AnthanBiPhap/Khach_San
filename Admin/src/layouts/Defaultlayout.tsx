@@ -43,14 +43,15 @@ const menuItems = [
   createMenuItem('Dashboard', '/', <PieChartOutlined />),
   createMenuItem('Users', '/users', <TeamOutlined />),
   createMenuItem('Bookings', '/bookings', <BookOutlined />),
-  createMenuItem('Booking Status', '/booking-status', <FileDoneOutlined />),
-  createMenuItem('Invoices', '/invoices', <FileTextOutlined />),
+  createMenuItem('Booking Status', '/bookingStatus', <FileDoneOutlined />),
   createMenuItem('Rooms', '/rooms', <HomeOutlined />),
   createMenuItem('Room Types', '/room-types', <AppstoreOutlined />),
   createMenuItem('Services', '/services', <ToolOutlined />),
   createMenuItem('Service Bookings', '/service-bookings', <ShoppingCartOutlined />),
   createMenuItem('Locations', '/locations', <EnvironmentOutlined />),
   createMenuItem('Reviews', '/reviews', <StarOutlined />),
+  createMenuItem('Invoices', '/invoices', <FileTextOutlined />),
+  createMenuItem('Invoice Items', '/invoiceitems', <FileTextOutlined />),
 ];
 
 const Defaultlayout: React.FC = () => {

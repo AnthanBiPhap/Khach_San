@@ -2,17 +2,17 @@ import { Table, Typography, message, Button } from "antd";
 import { useEffect, useState } from "react";
 import { CalendarOutlined, PlusOutlined } from "@ant-design/icons";
 import BookingForm from "../../components/BookingStatus/BookingStatusForm";
-import type { Booking } from "../../types/booking";
+import type { BookingStatusLog } from "../../types/bookingstatus";
 import { fetchBookings, deleteBooking } from "../../services/bookingStatus.service";
 import { env } from "../../constanst/getEnvs";
-import { bookingColumns } from "../../components/BookingStatus/BookingStatusColumns";
+import { bookingStatusColumns } from "../../components/BookingStatus/BookingStatusColumns";
 
 export default function BookingPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingStatusLog[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<BookingStatusLog | null>(null);
 
   const loadBookings = async (page = 1, limit = 10) => {
     //bookingStatus
@@ -50,7 +50,7 @@ export default function BookingPage() {
     }
   };
 
-  const handleSave = async (values: Partial<Booking>) => {
+  const handleSave = async (values: Partial<BookingStatusLog>) => {
     try {
       const url = editingBooking
         ? `${env.API_URL}/api/v1/bookingStatus/${editingBooking._id}`
@@ -69,7 +69,7 @@ export default function BookingPage() {
         throw new Error(error.message || "Có lỗi xảy ra");
       }
 
-      message.success(editingBooking ? "Cập nhật thành công" : "Tạo đặt phòng thành công");
+      message.success(editingBooking ? "Cập nhật thành công" : "Tạo log thành công");
       setOpenForm(false);
       loadBookings(pagination.current, pagination.pageSize);
     } catch (error: any) {
@@ -82,7 +82,7 @@ export default function BookingPage() {
     <div style={{ padding: 24 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
         <Typography.Title level={4}>
-          <CalendarOutlined /> Quản lý đặt phòng
+          <CalendarOutlined /> Nhật ký trạng thái đặt phòng
         </Typography.Title>
         <Button
           type="primary"
@@ -92,12 +92,12 @@ export default function BookingPage() {
             setOpenForm(true);
           }}
         >
-          Thêm đặt phòng
+          Thêm log
         </Button>
       </div>
 
       <Table
-        columns={bookingColumns(
+        columns={bookingStatusColumns(
           (record) => {
             setEditingBooking(record);
             setOpenForm(true);
@@ -110,12 +110,12 @@ export default function BookingPage() {
         pagination={{
           ...pagination,
           showSizeChanger: true,
-          showTotal: (total) => `Tổng ${total} đặt phòng`,
+          showTotal: (total) => `Tổng ${total} log`,
         }}
         onChange={(p) => loadBookings(p.current, p.pageSize)}
         bordered
         scroll={{ x: "max-content" }}
-        locale={{ emptyText: "Không có dữ liệu đặt phòng" }}
+        locale={{ emptyText: "Không có dữ liệu log" }}
       />
 
       <BookingForm
@@ -131,4 +131,5 @@ export default function BookingPage() {
     </div>
   );
 }
+
 
