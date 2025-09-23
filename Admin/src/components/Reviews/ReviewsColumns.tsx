@@ -4,7 +4,8 @@ import type { ReviewItem } from "../../types/review";
 
 export const reviewsColumns = (
   handleEdit: (record: ReviewItem) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: ReviewItem) => void
 ): ColumnsType<ReviewItem> => [
   {
     title: "Đối tượng",
@@ -43,6 +44,7 @@ export const reviewsColumns = (
       <Space>
         <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
         <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        <a onClick={() => handleDetail?.(r)}>Chi tiết</a>
       </Space>
     ),
   },

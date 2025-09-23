@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Tag, Space, Typography, message } from "antd";
+import { Table, Tag, Space, Typography, message, Drawer, Descriptions } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { UserOutlined, CheckCircleOutlined, StopOutlined } from "@ant-design/icons";
 import UserForm from "../../components/User/UserForm";
@@ -7,12 +7,15 @@ import type { User } from "../../types/user";
 import { fetchUsers, deleteUser } from "../../services/user.service"; 
 import { env } from "../../constanst/getEnvs"; 
 
+
 export default function UserPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailUser, setDetailUser] = useState<User | null>(null);
 
   const columns: ColumnsType<User> = [
     { title: "Họ và tên", dataIndex: "fullName", key: "fullName" },
@@ -53,6 +56,14 @@ export default function UserPage() {
             Chỉnh sửa
           </a>
           <a onClick={() => handleDelete(record._id)}>Xóa</a>
+          <a
+            onClick={() => {
+              setDetailUser(record);
+              setOpenDetail(true);
+            }}
+          >
+            Chi tiết
+          </a>
         </Space>
       ),
     },
@@ -147,6 +158,45 @@ export default function UserPage() {
         onCancel={() => setOpenForm(false)}
         onSave={handleSave}
       />
+
+      <Drawer
+        title={detailUser ? `Chi tiết người dùng: ${detailUser.fullName}` : "Chi tiết người dùng"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailUser(null); }}
+        width={520}
+      >
+        {detailUser && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailUser._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Họ và tên">{detailUser.fullName}</Descriptions.Item>
+            <Descriptions.Item label="Email">{detailUser.email}</Descriptions.Item>
+            <Descriptions.Item label="Số điện thoại">{detailUser.phoneNumber || "-"}</Descriptions.Item>
+            <Descriptions.Item label="Vai trò">
+              <Tag color={detailUser.role === "admin" ? "volcano" : detailUser.role === "staff" ? "blue" : "geekblue"}>
+                {detailUser.role?.toUpperCase()}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailUser.status === "active" ? "success" : "error"}>
+                {detailUser.status === "active" ? "Đang hoạt động" : "Vô hiệu hóa"}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Sở thích">
+              <Space wrap>
+                {(detailUser.preferences as string[] | undefined)?.length
+                  ? (detailUser.preferences as string[]).map((p) => <Tag key={p}>{p}</Tag>)
+                  : "-"}
+              </Space>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">
+              {detailUser.createdAt ? new Date(detailUser.createdAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">
+              {detailUser.updatedAt ? new Date(detailUser.updatedAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

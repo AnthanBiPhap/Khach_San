@@ -4,7 +4,8 @@ import type { ServiceBookingItem } from "../../types/serviceBooking";
 
 export const serviceBookingsColumns = (
   handleEdit: (record: ServiceBookingItem) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: ServiceBookingItem) => void
 ): ColumnsType<ServiceBookingItem> => [
   {
     title: "Dịch vụ",
@@ -48,6 +49,7 @@ export const serviceBookingsColumns = (
       <Space>
         <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
         <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        {handleDetail && <a onClick={() => handleDetail(r)}>Chi tiết</a>}
       </Space>
     ),
   },

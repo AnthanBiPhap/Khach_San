@@ -4,12 +4,16 @@ import type { LocationItem } from "../../types/location";
 
 export const locationsColumns = (
   handleEdit: (record: LocationItem) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: LocationItem) => void
 ): ColumnsType<LocationItem> => [
   {
     title: "Tên địa điểm",
     dataIndex: "name",
     key: "name",
+    render: (value: string, record) => (
+      handleDetail ? <a onClick={() => handleDetail(record)}>{value}</a> : <span>{value}</span>
+    )
   },
   {
     title: "Loại",
@@ -52,8 +56,10 @@ export const locationsColumns = (
     key: "actions",
     render: (_, r) => (
       <Space>
+       
         <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
         <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        <a onClick={() => handleDetail?.(r)}>Chi tiết</a>
       </Space>
     ),
   },

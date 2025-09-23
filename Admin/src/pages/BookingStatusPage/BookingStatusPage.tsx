@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { CalendarOutlined, PlusOutlined } from "@ant-design/icons";
 import BookingForm from "../../components/BookingStatus/BookingStatusForm";
@@ -13,6 +13,8 @@ export default function BookingPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editingBooking, setEditingBooking] = useState<BookingStatusLog | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<BookingStatusLog | null>(null);
 
   const loadBookings = async (page = 1, limit = 10) => {
     //bookingStatus
@@ -102,7 +104,11 @@ export default function BookingPage() {
             setEditingBooking(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={bookings}
         rowKey="_id"
@@ -128,6 +134,31 @@ export default function BookingPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết log` : "Chi tiết log"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Booking">
+              {detailItem.bookingId?._id?.slice(0,8)}... | Nhận: {detailItem.bookingId?.checkIn ? new Date(detailItem.bookingId.checkIn).toLocaleString("vi-VN") : "-"} | Trả: {detailItem.bookingId?.checkOut ? new Date(detailItem.bookingId.checkOut).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Người thao tác">
+              {(detailItem.actorId as any)?.fullName || (detailItem.actorId as any)?._id || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Hành động">
+              <Tag color={detailItem.action === "check_in" ? "green" : detailItem.action === "check_out" ? "blue" : detailItem.action === "cancel" ? "red" : "geekblue"}>
+                {detailItem.action}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Ghi chú">{detailItem.note || "-"}</Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

@@ -4,18 +4,22 @@ import type { InvoiceItemEntry } from "../../types/invoiceItem";
 
 export const invoiceItemsColumns = (
   handleEdit: (record: InvoiceItemEntry) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: InvoiceItemEntry) => void
 ): ColumnsType<InvoiceItemEntry> => [
   {
     title: "Hóa đơn",
     key: "invoice",
-    render: (_, r) => (
-      <div>
-        <div>Mã: {r.invoiceId?._id?.slice(0,8)}...</div>
-        <div style={{ color: '#888', fontSize: 12 }}>Tổng: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(r.invoiceId?.totalAmount || 0)}</div>
-        <div style={{ color: '#888', fontSize: 12 }}>TT: {r.invoiceId?.status}</div>
-      </div>
-    )
+    render: (_, r) => {
+      const content = (
+        <div>
+          <div>Mã: {r.invoiceId?._id?.slice(0,8)}...</div>
+          <div style={{ color: '#888', fontSize: 12 }}>Tổng: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(r.invoiceId?.totalAmount || 0)}</div>
+          <div style={{ color: '#888', fontSize: 12 }}>TT: {r.invoiceId?.status}</div>
+        </div>
+      );
+      return handleDetail ? <a onClick={() => handleDetail(r)}>{content}</a> : content;
+    }
   },
   {
     title: "Loại",
@@ -49,6 +53,7 @@ export const invoiceItemsColumns = (
       <Space>
         <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
         <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        <a onClick={() => handleDetail?.(r)}>Chi tiết</a>
       </Space>
     )
   }

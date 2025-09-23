@@ -4,7 +4,8 @@ import type { RoomType } from "../../types/room";
 
 export const roomTypesColumns = (
   handleEdit: (record: RoomType) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: RoomType) => void
 ): ColumnsType<RoomType> => [
   {
     title: "Tên loại phòng",
@@ -47,10 +48,11 @@ export const roomTypesColumns = (
   {
     title: "Thao tác",
     key: "actions",
-    render: (_, record) => (
+    render: (_, r) => (
       <Space>
-        <a onClick={() => handleEdit(record)}>Chỉnh sửa</a>
-        <a onClick={() => handleDelete(record._id)}>Xóa</a>
+        <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
+        <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        {handleDetail && <a onClick={() => handleDetail(r)}>Chi tiết</a>}
       </Space>
     ),
   },

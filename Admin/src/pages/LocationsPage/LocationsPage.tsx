@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions, Space, Tag, Image } from "antd";
 import { useEffect, useState } from "react";
 import { EnvironmentOutlined, PlusOutlined } from "@ant-design/icons";
 import type { LocationItem } from "../../types/location";
@@ -13,6 +13,8 @@ export default function LocationsPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<LocationItem | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<LocationItem | null>(null);
 
   const load = async (page = 1, limit = 10) => {
     try {
@@ -102,7 +104,11 @@ export default function LocationsPage() {
             setEditing(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={items}
         rowKey="_id"
@@ -128,6 +134,48 @@ export default function LocationsPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết địa điểm: ${detailItem.name}` : "Chi tiết địa điểm"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Tên địa điểm">{detailItem.name}</Descriptions.Item>
+            <Descriptions.Item label="Loại">
+              <Tag>{detailItem.type}</Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Mô tả">{detailItem.description || "-"}</Descriptions.Item>
+            <Descriptions.Item label="Địa chỉ">{detailItem.address || "-"}</Descriptions.Item>
+            <Descriptions.Item label="Ảnh">
+              <Space wrap>
+                {(detailItem.images || []).length
+                  ? (detailItem.images || []).map((img, idx) => (
+                      <Image key={idx} src={img} width={80} height={60} style={{ objectFit: "cover" }} />
+                    ))
+                  : "-"}
+              </Space>
+            </Descriptions.Item>
+            <Descriptions.Item label="Điểm">
+              {detailItem.ratingAvg ?? "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailItem.status === "active" ? "green" : detailItem.status === "hidden" ? "orange" : "red"}>
+                {detailItem.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">
+              {detailItem.createdAt ? new Date(detailItem.createdAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">
+              {detailItem.updatedAt ? new Date(detailItem.updatedAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

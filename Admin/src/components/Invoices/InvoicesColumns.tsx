@@ -4,18 +4,22 @@ import type { InvoiceItem } from "../../types/invoice";
 
 export const invoicesColumns = (
   handleEdit: (record: InvoiceItem) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: InvoiceItem) => void
 ): ColumnsType<InvoiceItem> => [
   {
     title: "Booking",
     key: "booking",
-    render: (_, r) => (
-      <div>
-        <div>Mã: {r.bookingId?._id?.slice(0,8)}...</div>
-        <div style={{ color: '#888', fontSize: 12 }}>Nhận: {r.bookingId?.checkIn ? new Date(r.bookingId.checkIn).toLocaleString('vi-VN') : '-'}</div>
-        <div style={{ color: '#888', fontSize: 12 }}>Trả: {r.bookingId?.checkOut ? new Date(r.bookingId.checkOut).toLocaleString('vi-VN') : '-'}</div>
-      </div>
-    )
+    render: (_, r) => {
+      const content = (
+        <div>
+          <div>Mã: {r.bookingId?._id?.slice(0,8)}...</div>
+          <div style={{ color: '#888', fontSize: 12 }}>Nhận: {r.bookingId?.checkIn ? new Date(r.bookingId.checkIn).toLocaleString('vi-VN') : '-'}</div>
+          <div style={{ color: '#888', fontSize: 12 }}>Trả: {r.bookingId?.checkOut ? new Date(r.bookingId.checkOut).toLocaleString('vi-VN') : '-'}</div>
+        </div>
+      );
+      return handleDetail ? <a onClick={() => handleDetail(r)}>{content}</a> : content;
+    }
   },
   {
     title: "Khách hàng",
@@ -59,6 +63,7 @@ export const invoicesColumns = (
       <Space>
         <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
         <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        <a onClick={() => handleDetail?.(r)}>Chi tiết</a>
       </Space>
     )
   }

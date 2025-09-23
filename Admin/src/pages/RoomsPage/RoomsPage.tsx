@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions, Space, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { HomeOutlined, PlusOutlined } from "@ant-design/icons";
 import type { Room } from "../../types/room";
@@ -13,6 +13,8 @@ export default function RoomsPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<Room | null>(null);
 
   const loadRooms = async (page = 1, limit = 10) => {
     try {
@@ -102,7 +104,11 @@ export default function RoomsPage() {
             setEditingRoom(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={rooms}
         rowKey="_id"
@@ -128,6 +134,49 @@ export default function RoomsPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết phòng: ${detailItem.roomNumber}` : "Chi tiết phòng"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Số phòng">{detailItem.roomNumber}</Descriptions.Item>
+            <Descriptions.Item label="Loại phòng">
+              {detailItem.typeId?.name || (detailItem.typeId as any)?._id || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Giá / đêm">
+              {detailItem.typeId && (detailItem.typeId as any).pricePerNight !== undefined
+                ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format((detailItem.typeId as any).pricePerNight)
+                : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Sức chứa">
+              {detailItem.typeId && (detailItem.typeId as any).capacity !== undefined ? (detailItem.typeId as any).capacity : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailItem.status === "available" ? "green" : detailItem.status === "occupied" ? "blue" : "orange"}>
+                {detailItem.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tiện nghi">
+              <Space wrap>
+                {(detailItem.amenities || []).length
+                  ? (detailItem.amenities || []).map((a) => <Tag key={a}>{a}</Tag>)
+                  : "-"}
+              </Space>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">
+              {detailItem.createdAt ? new Date(detailItem.createdAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">
+              {detailItem.updatedAt ? new Date(detailItem.updatedAt as any).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

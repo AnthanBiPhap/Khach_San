@@ -4,12 +4,20 @@ import type { Room } from "../../types/room";
 
 export const roomsColumns = (
   handleEdit: (record: Room) => void,
-  handleDelete: (id: string) => void
+  handleDelete: (id: string) => void,
+  handleDetail?: (record: Room) => void
 ): ColumnsType<Room> => [
   {
     title: "Phòng",
     key: "roomNumber",
     dataIndex: "roomNumber",
+    render: (value: string, record) => (
+      handleDetail ? (
+        <a onClick={() => handleDetail(record)}>{value}</a>
+      ) : (
+        <span>{value}</span>
+      )
+    ),
   },
   {
     title: "Loại phòng",
@@ -65,10 +73,11 @@ export const roomsColumns = (
   {
     title: "Thao tác",
     key: "actions",
-    render: (_, record) => (
+    render: (_, r) => (
       <Space>
-        <a onClick={() => handleEdit(record)}>Chỉnh sửa</a>
-        <a onClick={() => handleDelete(record._id)}>Xóa</a>
+        <a onClick={() => handleEdit(r)}>Chỉnh sửa</a>
+        <a onClick={() => handleDelete(r._id)}>Xóa</a>
+        <a onClick={() => handleDetail?.(r)}>Chi tiết</a>
       </Space>
     ),
   },

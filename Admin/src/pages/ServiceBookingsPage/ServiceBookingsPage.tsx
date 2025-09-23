@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { ShoppingCartOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ServiceBookingItem } from "../../types/serviceBooking";
@@ -13,6 +13,8 @@ export default function ServiceBookingsPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<ServiceBookingItem | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<ServiceBookingItem | null>(null);
 
   const load = async (page = 1, limit = 10) => {
     try {
@@ -102,7 +104,11 @@ export default function ServiceBookingsPage() {
             setEditing(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={items}
         rowKey="_id"
@@ -128,6 +134,46 @@ export default function ServiceBookingsPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết lịch dịch vụ` : "Chi tiết lịch dịch vụ"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Dịch vụ">
+              {detailItem.serviceId?.name || detailItem.serviceId?._id || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Thời gian">
+              {detailItem.scheduledAt ? new Date(detailItem.scheduledAt).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Số lượng">{detailItem.quantity}</Descriptions.Item>
+            <Descriptions.Item label="Giá">
+              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detailItem.price)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailItem.status === "reserved" ? "blue" : detailItem.status === "completed" ? "green" : "red"}>
+                {detailItem.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Booking">
+              {detailItem.bookingId ? (detailItem.bookingId as any)._id || "-" : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Khách hàng">
+              {detailItem.customerId ? (detailItem.customerId as any)._id || "-" : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">
+              {detailItem.createdAt ? new Date(detailItem.createdAt).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">
+              {detailItem.updatedAt ? new Date(detailItem.updatedAt).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

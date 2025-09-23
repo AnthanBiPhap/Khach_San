@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions } from "antd";
 import { useEffect, useState } from "react";
 import { FileTextOutlined, PlusOutlined } from "@ant-design/icons";
 import type { InvoiceItemEntry } from "../../types/invoiceItem";
@@ -13,6 +13,8 @@ export default function InvoiceItemsPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<InvoiceItemEntry | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<InvoiceItemEntry | null>(null);
 
   const load = async (page = 1, limit = 10) => {
     try {
@@ -102,7 +104,11 @@ export default function InvoiceItemsPage() {
             setEditing(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={items}
         rowKey="_id"
@@ -128,6 +134,27 @@ export default function InvoiceItemsPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết mục hóa đơn` : "Chi tiết mục hóa đơn"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Hóa đơn">
+              {detailItem.invoiceId?._id?.slice(0,8)}... · Tổng: {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detailItem.invoiceId?.totalAmount || 0)} · TT: {detailItem.invoiceId?.status}
+            </Descriptions.Item>
+            <Descriptions.Item label="Loại">{detailItem.itemType}</Descriptions.Item>
+            <Descriptions.Item label="Mô tả">{detailItem.description}</Descriptions.Item>
+            <Descriptions.Item label="Số tiền">{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detailItem.amount)}</Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">{detailItem.createdAt ? new Date(detailItem.createdAt).toLocaleString("vi-VN") : "-"}</Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">{detailItem.updatedAt ? new Date(detailItem.updatedAt).toLocaleString("vi-VN") : "-"}</Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

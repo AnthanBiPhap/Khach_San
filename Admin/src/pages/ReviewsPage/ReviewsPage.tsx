@@ -1,4 +1,4 @@
-import { Table, Typography, message, Button } from "antd";
+import { Table, Typography, message, Button, Drawer, Descriptions, Tag } from "antd";
 import { useEffect, useState } from "react";
 import { StarOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ReviewItem } from "../../types/review";
@@ -13,6 +13,8 @@ export default function ReviewsPage() {
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<ReviewItem | null>(null);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [detailItem, setDetailItem] = useState<ReviewItem | null>(null);
 
   const load = async (page = 1, limit = 10) => {
     try {
@@ -102,7 +104,11 @@ export default function ReviewsPage() {
             setEditing(record);
             setOpenForm(true);
           },
-          handleDelete
+          handleDelete,
+          (record) => {
+            setDetailItem(record);
+            setOpenDetail(true);
+          }
         )}
         dataSource={items}
         rowKey="_id"
@@ -128,6 +134,38 @@ export default function ReviewsPage() {
         onSave={handleSave}
         loading={loading}
       />
+
+      <Drawer
+        title={detailItem ? `Chi tiết đánh giá` : "Chi tiết đánh giá"}
+        open={openDetail}
+        onClose={() => { setOpenDetail(false); setDetailItem(null); }}
+        width={680}
+      >
+        {detailItem && (
+          <Descriptions column={1} bordered size="middle">
+            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
+            <Descriptions.Item label="Người đánh giá">
+              {(detailItem.reviewerId as any)?.fullName || (detailItem.reviewerId as any)?._id || "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Đối tượng">
+              {detailItem.targetType}: {detailItem.targetId?.slice(0, 8)}...
+            </Descriptions.Item>
+            <Descriptions.Item label="Số sao">{detailItem.rating}</Descriptions.Item>
+            <Descriptions.Item label="Bình luận">{detailItem.comment || "-"}</Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={detailItem.status === "active" ? "green" : detailItem.status === "hidden" ? "orange" : "red"}>
+                {detailItem.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tạo lúc">
+              {detailItem.createdAt ? new Date(detailItem.createdAt).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Cập nhật">
+              {detailItem.updatedAt ? new Date(detailItem.updatedAt).toLocaleString("vi-VN") : "-"}
+            </Descriptions.Item>
+          </Descriptions>
+        )}
+      </Drawer>
     </div>
   );
 }

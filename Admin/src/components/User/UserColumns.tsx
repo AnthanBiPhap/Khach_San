@@ -18,7 +18,7 @@ export const getUserColumns = (
   {
     title: "Vai trò",
     dataIndex: "role",
-    key: "role",
+    key: "role",  
     render: (role) => (
       <Tag color={role === "admin" ? "volcano" : "geekblue"}>
         {role.toUpperCase()}
