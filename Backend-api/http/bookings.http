@@ -3,26 +3,33 @@ GET http://localhost:8080/api/v1/bookings
 Content-Type: application/json
 
 ### Lấy booking theo ID
-GET http://localhost:8080/api/v1/bookings
+GET http://localhost:8080/api/v1/bookings/ID_BOOKING
 Content-Type: application/json
 
-### Tạo booking mới
+### Tạo booking mới (walk-in)
 POST http://localhost:8080/api/v1/bookings
 Content-Type: application/json
 
 {
-  "customerId": "68cb70183c0249ce4ed2998f",  
-  "roomId": "68ca76e0df61ff9fa5f4ca97",     
-  "checkIn": "2025-09-20T14:00:00.000Z",
-  "checkOut": "2025-09-23T12:00:00.000Z",
-  "guests": 2,
-  "totalPrice": 2500000,
+  "guestInfo": {
+    "fullName": "Nguyễn Văn Tứ",
+    "phoneNumber": "1234567890",
+    "idNumber": "12345678909",
+    "age": 87
+  },
+  "roomId": "68ca76e0df61ff9fa5f4ca97",
+  "checkIn": "2026-02-12T00:00:00.000Z",
+  "checkOut": "2026-08-20T00:00:00.000Z",
+  "guests": 6,
+  "totalPrice": 22222222,
+  "status": "pending",
   "paymentStatus": "pending",
-  "notes": "Khách yêu cầu giường phụ"
+  "notes": "2222",
+  "specialRequests": "2222"
 }
 
 ### Cập nhật booking
-PUT http://localhost:8080/api/v1/bookings
+PUT http://localhost:8080/api/v1/bookings/ID_BOOKING
 Content-Type: application/json
 
 {
@@ -31,5 +38,5 @@ Content-Type: application/json
 }
 
 ### Xoá booking
-DELETE http://localhost:8080/api/v1/bookings
+DELETE http://localhost:8080/api/v1/bookings/ID_BOOKING
 Content-Type: application/json

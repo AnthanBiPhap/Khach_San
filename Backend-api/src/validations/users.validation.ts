@@ -37,7 +37,7 @@ const createSchema = yup
         .required(),
       phoneNumber: yup.string().min(6).max(20).required(),
       password: yup.string().min(6).max(255).required(),
-      role: yup.string().oneOf(["user", "admin", "staff"]).optional(),
+      role: yup.string().oneOf(["customer", "admin", "staff"]).optional(),
       isActive: yup.boolean().optional(),
     }),
   })
@@ -57,7 +57,7 @@ const updateByIdSchema = yup
       email: yup.string().max(100).email().optional(),
       phoneNumber: yup.string().min(6).max(20).optional(),
       password: yup.string().min(6).max(255).optional(),
-      role: yup.string().oneOf(["user", "admin", "staff"]).optional(),
+      role: yup.string().oneOf(["customer", "admin", "staff"]).optional(),
       isActive: yup.boolean().optional(),
     }),
   })

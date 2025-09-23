@@ -10,25 +10,40 @@ export const bookingStatusColumns = (
   {
     title: "Booking",
     key: "booking",
-    render: (_, record) => (
-      <div>
-        {/* <div>Mã: {record.bookingId?._id?.slice(0, 8)}...</div> */}
-        <div style={{ color: "#888", fontSize: 12 }}>
-          Nhận: {record.bookingId?.checkIn ? new Date(record.bookingId.checkIn).toLocaleString("vi-VN") : "-"}
+    render: (_, record) => {
+      const customerName =
+        record.bookingId?.customerId?.fullName ||
+        record.bookingId?.guestInfo?.fullName ||
+        "Khách walk-in";
+
+      return (
+        <div>
+          <div>{customerName}</div>
+          <div style={{ color: "#888", fontSize: 12 }}>
+            Nhận:{" "}
+            {record.bookingId?.checkIn
+              ? new Date(record.bookingId.checkIn).toLocaleString("vi-VN")
+              : "-"}
+          </div>
+          <div style={{ color: "#888", fontSize: 12 }}>
+            Trả:{" "}
+            {record.bookingId?.checkOut
+              ? new Date(record.bookingId.checkOut).toLocaleString("vi-VN")
+              : "-"}
+          </div>
         </div>
-        <div style={{ color: "#888", fontSize: 12 }}>
-          Trả: {record.bookingId?.checkOut ? new Date(record.bookingId.checkOut).toLocaleString("vi-VN") : "-"}
-        </div>
-      </div>
-    ),
+      );
+    },
   },
   {
     title: "Người thao tác",
     key: "actor",
     render: (_, record) => (
       <div>
-        <div>{record.actorId?.fullName}</div>
-        <div style={{ color: "#888", fontSize: 12 }}>{record.actorId?.email}</div>
+        <div>{record.actorId?.fullName || "Admin / Lễ tân"}</div>
+        <div style={{ color: "#888", fontSize: 12 }}>
+          {record.actorId?.email || "-"}
+        </div>
       </div>
     ),
   },

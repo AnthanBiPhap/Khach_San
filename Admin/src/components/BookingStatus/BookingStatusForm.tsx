@@ -1,10 +1,4 @@
-import {
-  Form,
-  Input,
-  Modal,
-  Select,
-  message,
-} from "antd";
+import { Form, Input, Modal, Select, message } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { BookingStatusLog } from "../../types/bookingstatus";
@@ -13,7 +7,19 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 interface SimpleUser { _id: string; fullName: string; email?: string }
-interface SimpleBooking { _id: string; checkIn?: string; checkOut?: string }
+interface SimpleBooking {
+  _id: string;
+  checkIn?: string;
+  checkOut?: string;
+  roomId?: {
+    _id: string;
+    roomNumber?: string;
+    typeId?: string;
+  };
+  customerId?: { fullName?: string; phoneNumber?: string; idNumber?: string };
+  guestInfo?: { fullName?: string; phoneNumber?: string; idNumber?: string };
+}
+
 
 interface BookingFormProps {
   open: boolean;
@@ -70,7 +76,7 @@ export default function BookingForm({
     if (booking) {
       form.setFieldsValue({
         bookingId: booking.bookingId?._id,
-        actorId: booking.actorId?._id,
+        actorId: booking.actorId?._id || (booking.actorName ? "system" : undefined),
         action: booking.action,
         note: booking.note,
       });
@@ -82,18 +88,37 @@ export default function BookingForm({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      await onSave({
+      const payload: Partial<BookingStatusLog> = {
         bookingId: values.bookingId,
-        actorId: values.actorId,
         action: values.action,
         note: values.note,
-      } as Partial<BookingStatusLog>);
+      };
+
+      if (values.actorId === "system") {
+        payload.actorId = null;
+        payload.actorName = "Admin / Lễ tân";
+      } else {
+        payload.actorId = values.actorId;
+        payload.actorName = undefined;
+      }
+
+      await onSave(payload);
     } catch (error) {
       console.error(error);
       message.error("Vui lòng điền đủ thông tin");
     }
   };
-  
+
+  const formatBookingLabel = (b: SimpleBooking) => {
+    const name = b.customerId?.fullName || b.guestInfo?.fullName || "-";
+    const phone = b.customerId?.phoneNumber || b.guestInfo?.phoneNumber || "-";
+    // const idNum = b.customerId?.idNumber || b.guestInfo?.idNumber || "-";
+    const room = b.roomId?.roomNumber || "-"; // dùng roomId.roomNumber
+    const checkIn = b.checkIn ? new Date(b.checkIn).toLocaleString("vi-VN") : "-";
+    const checkOut = b.checkOut ? new Date(b.checkOut).toLocaleString("vi-VN") : "-";
+    return `${name} | ${phone} |  | Phòng: ${room} | Nhận: ${checkIn} | Trả: ${checkOut}`;
+  };
+
 
   return (
     <Modal
@@ -102,7 +127,7 @@ export default function BookingForm({
       onCancel={onCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
-      width={700}
+      width={800}
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -118,7 +143,7 @@ export default function BookingForm({
               ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
             }
             options={bookings.map(b => ({
-              label: `${b._id?.slice(0,8)}...`,
+              label: formatBookingLabel(b),
               value: b._id,
             }))}
           />
@@ -136,10 +161,10 @@ export default function BookingForm({
             filterOption={(input, option) =>
               ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
             }
-            options={users.map(u => ({
-              label: `${u.fullName}`,
-              value: u._id,
-            }))}
+            options={[
+              ...users.map(u => ({ label: u.fullName, value: u._id })),
+              { label: "Admin / Lễ tân", value: "system" },
+            ]}
           />
         </Form.Item>
 

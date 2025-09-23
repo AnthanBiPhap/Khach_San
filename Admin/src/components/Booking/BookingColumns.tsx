@@ -11,10 +11,12 @@ export const bookingColumns = (
     title: "Khách hàng",
     key: "customer",
     render: (_, r) => {
+      const fullName = r.customerId?.fullName || r.guestInfo?.fullName || '-';
+      const emailOrPhone = r.customerId?.email || r.guestInfo?.phoneNumber || '';
       const content = (
         <div>
-          <div>{r.customerId?.fullName || '-'}</div>
-          <div style={{ color: '#888', fontSize: 12 }}>{r.customerId?.email || ''}</div>
+          <div>{fullName}</div>
+          <div style={{ color: '#888', fontSize: 12 }}>{emailOrPhone}</div>
         </div>
       );
       return handleDetail ? <a onClick={() => handleDetail(r)}>{content}</a> : content;

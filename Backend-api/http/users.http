@@ -7,10 +7,10 @@ Content-Type: application/json
 
 {
     "fullName": "Nguyen Van Tu",
-    "email": "admin@gmail.com",
-    "phoneNumber": "0704627402",
+    "email": "user@gmail.com",
+    "phoneNumber": "0704627403",
     "password": "123456",
-    "role": "admin",
+    "role": "customer",
     "status": "active",
     "preferences": ["tham quan","ăn uống","thể thao","phim ảnh","sách","game","du lịch","thư giãn","thăm bảo tàng","thăm vườn quốc gia"]
 }

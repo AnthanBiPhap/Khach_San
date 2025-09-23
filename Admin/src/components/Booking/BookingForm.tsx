@@ -5,6 +5,7 @@ import {
   Select,
   DatePicker,
   InputNumber,
+  Checkbox,
   message,
 } from "antd";
 import { useEffect, useState } from "react";
@@ -46,6 +47,7 @@ export default function BookingForm({
   loading,
 }: BookingFormProps) {
   const [form] = Form.useForm();
+  const [isWalkIn, setIsWalkIn] = useState(false);
 
   const [users, setUsers] = useState<{ _id: string; fullName: string }[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -88,8 +90,10 @@ export default function BookingForm({
         checkIn: booking.checkIn ? dayjs(booking.checkIn) : null,
         checkOut: booking.checkOut ? dayjs(booking.checkOut) : null,
       });
+      setIsWalkIn(!booking.customerId);
     } else {
       form.resetFields();
+      setIsWalkIn(false);
     }
   }, [booking, form]);
 
@@ -97,21 +101,31 @@ export default function BookingForm({
     try {
       const values = await form.validateFields();
       await onSave({
-        customerId: values.customerId,
+        guestInfo: isWalkIn
+          ? {
+              fullName: values.guestInfo.fullName,
+              phoneNumber: values.guestInfo.phoneNumber,
+              idNumber: values.guestInfo.idNumber,
+              age: values.guestInfo.age,
+            }
+          : undefined, // nếu khách đã có tài khoản thì dùng customerId
+        customerId: !isWalkIn ? values.customerId : undefined,
         roomId: values.roomId,
-        guests: values.guests,
         checkIn: values.checkIn?.toISOString(),
         checkOut: values.checkOut?.toISOString(),
+        guests: values.guests,
         totalPrice: values.totalPrice,
         status: values.status,
         paymentStatus: values.paymentStatus,
         notes: values.notes,
+        specialRequests: values.specialRequests,
       });
     } catch (error) {
       console.error(error);
       message.error("Vui lòng điền đủ thông tin");
     }
   };
+  
   
 
   return (
@@ -124,50 +138,100 @@ export default function BookingForm({
       width={700}
     >
       <Form form={form} layout="vertical">
-      <Form.Item
-          name="customerId"
-          label="Khách hàng"
-          rules={[{ required: true, message: "Chọn khách hàng" }]}
+        <Form.Item>
+          <Checkbox
+            checked={isWalkIn}
+            onChange={(e) => setIsWalkIn(e.target.checked)}
+          >
+            Khách walk-in
+          </Checkbox>
+        </Form.Item>
+
+        {!isWalkIn && (
+          <Form.Item
+            name="customerId"
+            label="Khách hàng"
+            rules={[{ required: true, message: "Chọn khách hàng" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Chọn khách hàng"
+              loading={loadingUsers}
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={users.map((u) => ({
+                label: u.fullName,
+                value: u._id,
+              }))}
+            />
+          </Form.Item>
+        )}
+
+        {isWalkIn && (
+          <>
+            <Form.Item
+              name={["guestInfo", "fullName"]}
+              label="Họ và tên khách"
+              rules={[{ required: true, message: "Nhập họ và tên khách" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name={["guestInfo", "phoneNumber"]}
+              label="Số điện thoại"
+              rules={[{ required: true, message: "Nhập số điện thoại" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name={["guestInfo", "idNumber"]}
+              label="CMND / CCCD"
+              rules={[{ required: true, message: "Nhập CMND/CCCD" }]}
+            >
+              <Input />
+            </Form.Item>
+
+
+            <Form.Item name={["guestInfo", "age"]} label="Tuổi">
+              <InputNumber min={0} style={{ width: "100%" }} />
+            </Form.Item>
+          </>
+        )}
+
+        <Form.Item
+          name="roomId"
+          label="Phòng"
+          rules={[{ required: true, message: "Chọn phòng" }]}
         >
           <Select
             showSearch
-    placeholder="Chọn khách hàng"
-    loading={loadingUsers}
-    filterOption={(input, option) =>
-      (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-    }
-    options={users.map(u => ({
-      label: u.fullName,
-      value: u._id,
-    }))}
-  />
-</Form.Item>
-
-<Form.Item
-  name="roomId"
-  label="Phòng"
-  rules={[{ required: true, message: "Chọn phòng" }]}
->
-  <Select
-    showSearch
-    placeholder="Chọn phòng"
-    loading={loadingRooms}
-    filterOption={(input, option) =>
-      (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-    }
-    options={rooms.map(r => ({
-      label: r.roomNumber,   // dùng roomNumber để hiển thị
-      value: r._id,
-    }))}
-  />
-</Form.Item>
+            placeholder="Chọn phòng"
+            loading={loadingRooms}
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={rooms.map((r) => ({
+              label: r.roomNumber,
+              value: r._id,
+            }))}
+          />
+        </Form.Item>
 
         <Form.Item
           name="checkIn"
           label="Ngày nhận phòng"
           rules={[{ required: true, message: "Vui lòng chọn ngày nhận phòng" }]}
         >
-          <DatePicker style={{ width: "100%" }} showTime format="DD/MM/YYYY HH:mm" />
+          <DatePicker
+            style={{ width: "100%" }}
+            showTime
+            format="DD/MM/YYYY HH:mm"
+          />
         </Form.Item>
 
         <Form.Item
@@ -175,26 +239,22 @@ export default function BookingForm({
           label="Ngày trả phòng"
           rules={[{ required: true, message: "Vui lòng chọn ngày trả phòng" }]}
         >
-          <DatePicker style={{ width: "100%" }} showTime format="DD/MM/YYYY HH:mm" />
+          <DatePicker
+            style={{ width: "100%" }}
+            showTime
+            format="DD/MM/YYYY HH:mm"
+          />
         </Form.Item>
 
         <Form.Item
-  name="guests"
-  label="Số lượng khách"
-  rules={[{ required: true, message: "Nhập số lượng khách" }]}
->
-  <InputNumber min={1} style={{ width: "100%" }} />
-</Form.Item>
-
-<Form.Item name="notes" label="Ghi chú">
-  <TextArea rows={4} />
-</Form.Item>
-
-        <Form.Item
-          name="totalPrice"
-          label="Tổng tiền"
-          rules={[{ required: true, message: "Vui lòng nhập tổng tiền" }]}
+          name="guests"
+          label="Số lượng khách"
+          rules={[{ required: true, message: "Nhập số lượng khách" }]}
         >
+          <InputNumber min={1} style={{ width: "100%" }} />
+        </Form.Item>
+
+        <Form.Item name="totalPrice" label="Tổng tiền">
           <InputNumber
             min={0}
             style={{ width: "100%" }}
@@ -228,8 +288,12 @@ export default function BookingForm({
           </Select>
         </Form.Item>
 
+        <Form.Item name="notes" label="Ghi chú">
+          <TextArea rows={3} />
+        </Form.Item>
+
         <Form.Item name="specialRequests" label="Yêu cầu đặc biệt">
-          <TextArea rows={4} />
+          <TextArea rows={3} />
         </Form.Item>
       </Form>
     </Modal>

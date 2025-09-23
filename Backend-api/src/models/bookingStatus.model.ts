@@ -9,8 +9,13 @@ const bookingStatusLogSchema = new Schema(
     },
     actorId: {
       type: Schema.Types.ObjectId,
-      ref: "User", // ai đổi trạng thái: admin, lễ tân...
-      required: [true, "Thiếu thông tin người thay đổi"],
+      ref: "User", // user bình thường (customer)
+      required: false,
+    },
+    actorName: {
+      type: String, // admin/staff hoặc tên user nếu cần
+      trim: true,
+      required: false,
     },
     action: {
       type: String,
@@ -23,7 +28,7 @@ const bookingStatusLogSchema = new Schema(
     },
   },
   {
-    timestamps: false, // vì đã có changedAt riêng
+    timestamps: false,
     versionKey: false,
   }
 );
