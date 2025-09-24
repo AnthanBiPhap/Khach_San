@@ -1,33 +1,10 @@
-import { Form, Input, Modal, Select, message } from "antd";
+import { Form, Input, Modal, Select, message, Row, Col, Typography } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import type { BookingStatusLog } from "../../types/bookingstatus";
+import type { BookingStatusLog, SimpleUser, SimpleBooking, BookingFormProps } from "../../types/bookingstatus";
 
 const { Option } = Select;
 const { TextArea } = Input;
-
-interface SimpleUser { _id: string; fullName: string; email?: string }
-interface SimpleBooking {
-  _id: string;
-  checkIn?: string;
-  checkOut?: string;
-  roomId?: {
-    _id: string;
-    roomNumber?: string;
-    typeId?: string;
-  };
-  customerId?: { fullName?: string; phoneNumber?: string; idNumber?: string };
-  guestInfo?: { fullName?: string; phoneNumber?: string; idNumber?: string };
-}
-
-
-interface BookingFormProps {
-  open: boolean;
-  booking?: BookingStatusLog | null;
-  onCancel: () => void;
-  onSave: (values: Partial<BookingStatusLog>) => Promise<void>;
-  loading?: boolean;
-}
 
 export default function BookingForm({
   open,
@@ -123,68 +100,82 @@ export default function BookingForm({
   return (
     <Modal
       open={open}
-      title={booking ? "Chỉnh sửa log" : "Tạo log mới"}
+      title={booking ? "Chỉnh sửa trạng thái đặt phòng" : "Cập nhật trạng thái đặt phòng"}
       onCancel={onCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
-      width={800}
+      width={700}
+      style={{ top: 50 }}
+      okText={booking ? "Cập nhật" : "Xác nhận"}
+      cancelText="Hủy bỏ"
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="bookingId"
-          label="Booking"
-          rules={[{ required: true, message: "Chọn booking" }]}
-        >
-          <Select
-            showSearch
-            placeholder="Chọn booking"
-            loading={loadingBookings}
-            filterOption={(input, option) =>
-              ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-            options={bookings.map(b => ({
-              label: formatBookingLabel(b),
-              value: b._id,
-            }))}
-          />
-        </Form.Item>
+      <Form form={form} layout="vertical" style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>
+        <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <Typography.Title level={5} style={{ marginBottom: '12px', fontSize: '14px' }}>Thông tin đặt phòng</Typography.Title>
+          
+          <Form.Item
+            name="bookingId"
+            label="Chọn đặt phòng"
+            rules={[{ required: true, message: "Chọn đặt phòng" }]}
+          >
+            <Select
+              showSearch
+              placeholder="Chọn đặt phòng"
+              loading={loadingBookings}
+              filterOption={(input, option) =>
+                ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              options={bookings.map(b => ({
+                label: formatBookingLabel(b),
+                value: b._id,
+              }))}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+        </div>
 
-        <Form.Item
-          name="actorId"
-          label="Người thao tác"
-          rules={[{ required: true, message: "Chọn người thao tác" }]}
-        >
-          <Select
-            showSearch
-            placeholder="Chọn người thao tác"
-            loading={loadingUsers}
-            filterOption={(input, option) =>
-              ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-            options={[
-              ...users.map(u => ({ label: u.fullName, value: u._id })),
-              { label: "Admin / Lễ tân", value: "system" },
-            ]}
-          />
-        </Form.Item>
+        <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <Typography.Title level={5} style={{ marginBottom: '12px', fontSize: '14px' }}>Thông tin người thực hiện</Typography.Title>
+          
+          <Form.Item
+            name="actorId"
+            label="Người thực hiện"
+            rules={[{ required: true, message: "Chọn người thực hiện" }]}
+            initialValue="system"
+          >
+            <Select disabled style={{ width: '100%' }}>
+              <Select.Option value="system">Admin / Lễ tân</Select.Option>
+            </Select>
+          </Form.Item>
+        </div>
 
-        <Form.Item
-          name="action"
-          label="Hành động"
-          rules={[{ required: true, message: "Chọn hành động" }]}
-        >
-          <Select>
-            <Option value="check_in">Check-in</Option>
-            <Option value="check_out">Check-out</Option>
-            <Option value="cancel">Hủy</Option>
-            <Option value="extend">Gia hạn</Option>
-            <Option value="extend_check_out">Lùi giờ trả</Option>
-          </Select>
-        </Form.Item>
 
-        <Form.Item name="note" label="Ghi chú">
-          <TextArea rows={4} />
-        </Form.Item>
+        <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <Typography.Title level={5} style={{ marginBottom: '12px', fontSize: '14px' }}>Thông tin cập nhật</Typography.Title>
+          
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                name="action"
+                label="Hành động"
+                rules={[{ required: true, message: "Chọn hành động" }]}
+              >
+                <Select style={{ width: '100%' }}>
+                  <Option value="check_in">Check-in</Option>
+                  <Option value="check_out">Check-out</Option>
+                  <Option value="cancel">Hủy đặt phòng</Option>
+                  <Option value="extend">Gia hạn</Option>
+                  <Option value="extend_check_out">Lùi giờ trả</Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="note" label="Ghi chú" style={{ marginBottom: 0 }}>
+                <TextArea rows={2} placeholder="Nhập ghi chú (nếu có)" style={{ resize: 'none' }} />
+              </Form.Item>
+            </Col>
+          </Row>
+        </div>
       </Form>
     </Modal>
   );

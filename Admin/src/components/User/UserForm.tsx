@@ -1,13 +1,6 @@
 import React from "react";
 import { Form, Input, Modal, Select } from "antd";
-import type { User } from "../../types/user";
-
-interface UserFormProps {
-  open: boolean;
-  user: User | null;
-  onCancel: () => void;
-  onSave: (values: Partial<User>) => void;
-}
+import type { User, UserFormProps } from "../../types/user";
 
 export default function UserForm({ open, user, onCancel, onSave }: UserFormProps) {
   const [form] = Form.useForm();

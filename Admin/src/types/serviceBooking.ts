@@ -25,3 +25,12 @@ export interface ServiceBookingItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface ServiceBookingsFormProps {
+  open: boolean;
+  item?: ServiceBookingItem | null;
+  onCancel: () => void;
+  onSave: (values: Partial<ServiceBookingItem>) => Promise<void>;
+  loading?: boolean;
+}
+export interface SimpleRef { _id: string; name?: string; fullName?: string }

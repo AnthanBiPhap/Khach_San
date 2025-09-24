@@ -25,3 +25,11 @@ export interface LocationItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface LocationsFormProps {
+  open: boolean;
+  item?: LocationItem | null;
+  onCancel: () => void;
+  onSave: (values: Partial<LocationItem>) => Promise<void>;
+  loading?: boolean;
+}

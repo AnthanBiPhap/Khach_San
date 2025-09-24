@@ -17,3 +17,13 @@ export interface InvoiceItemEntry {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface SimpleInvoice { _id: string; totalAmount?: number; status?: string }
+
+export interface InvoiceItemsFormProps {
+  open: boolean;
+  item?: InvoiceItemEntry | null;
+  onCancel: () => void;
+  onSave: (values: Partial<InvoiceItemEntry>) => Promise<void>;
+  loading?: boolean;
+}

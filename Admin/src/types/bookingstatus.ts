@@ -35,3 +35,25 @@ export interface BookingStatusPagination {
   page: number;
 }
 
+export interface SimpleUser { _id: string; fullName: string; email?: string }
+export interface SimpleBooking {
+  _id: string;
+  checkIn?: string;
+  checkOut?: string;
+  roomId?: {
+    _id: string;
+    roomNumber?: string;
+    typeId?: string;
+  };
+  customerId?: { fullName?: string; phoneNumber?: string; idNumber?: string };
+  guestInfo?: { fullName?: string; phoneNumber?: string; idNumber?: string };
+}
+
+
+export interface BookingFormProps {
+  open: boolean;
+  booking?: BookingStatusLog | null;
+  onCancel: () => void;
+  onSave: (values: Partial<BookingStatusLog>) => Promise<void>;
+  loading?: boolean;
+}

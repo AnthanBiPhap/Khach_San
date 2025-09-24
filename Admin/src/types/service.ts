@@ -9,3 +9,11 @@ export interface ServiceItem {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface ServicesFormProps {
+  open: boolean;
+  service?: ServiceItem | null;
+  onCancel: () => void;
+  onSave: (values: Partial<ServiceItem>) => Promise<void>;
+  loading?: boolean;
+}

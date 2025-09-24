@@ -1,21 +1,11 @@
-import { Form, InputNumber, Modal, Select, DatePicker, message } from "antd";
+import { Form, InputNumber, Modal, Select, DatePicker, message, Row, Col, Typography, Tag } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import type { InvoiceItem } from "../../types/invoice";
+import type { InvoiceItem, SimpleUser, SimpleBooking, InvoicesFormProps } from "../../types/invoice";
 import dayjs from "dayjs";
 
 const { Option } = Select;
-
-interface SimpleUser { _id: string; fullName?: string }
-interface SimpleBooking { _id: string; checkIn?: string; checkOut?: string }
-
-interface InvoicesFormProps {
-  open: boolean;
-  item?: InvoiceItem | null;
-  onCancel: () => void;
-  onSave: (values: Partial<InvoiceItem>) => Promise<void>;
-  loading?: boolean;
-}
+const { Title } = Typography;
 
 export default function InvoicesForm({ open, item, onCancel, onSave, loading }: InvoicesFormProps) {
   const [form] = Form.useForm();
@@ -78,53 +68,148 @@ export default function InvoicesForm({ open, item, onCancel, onSave, loading }: 
     } as Partial<InvoiceItem>);
   };
 
+  const getStatusTag = (status: string) => {
+    switch (status) {
+      case 'pending': return <Tag color="orange">Chờ thanh toán</Tag>;
+      case 'paid': return <Tag color="green">Đã thanh toán</Tag>;
+      case 'failed': return <Tag color="red">Thất bại</Tag>;
+      case 'refunded': return <Tag color="blue">Hoàn tiền</Tag>;
+      default: return <Tag>{status}</Tag>;
+    }
+  };
+
+  const formatCurrency = (value: number | string | undefined) => {
+    if (value === undefined) return '0';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+  };
+
   return (
     <Modal
       open={open}
-      title={item ? "Chỉnh sửa hóa đơn" : "Tạo hóa đơn"}
+      title={item ? "Chỉnh sửa hóa đơn" : "Tạo hóa đơn mới"}
       onCancel={onCancel}
       onOk={handleSubmit}
       confirmLoading={loading}
       width={700}
+      style={{ top: 50 }}
+      okText="Lưu"
+      cancelText="Hủy"
     >
-      <Form form={form} layout="vertical">
-        <Form.Item name="bookingId" label="Booking" rules={[{ required: true, message: "Chọn booking" }]}>
-          <Select
-            showSearch
-            placeholder="Chọn booking"
-            loading={loadingBookings}
-            filterOption={(input, option) => ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())}
-            options={bookings.map(b => ({ label: b._id?.slice(0,8)+"...", value: b._id }))}
-          />
-        </Form.Item>
+      <Form form={form} layout="vertical" style={{ maxHeight: '70vh', overflowY: 'auto', paddingRight: '8px' }}>
+        <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <Title level={5} style={{ marginBottom: '12px', fontSize: '14px' }}>Thông tin đặt phòng</Title>
+          
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item 
+                name="bookingId" 
+                label="Mã đặt phòng" 
+                rules={[{ required: true, message: "Chọn mã đặt phòng" }]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Tìm kiếm mã đặt phòng..."
+                  loading={loadingBookings}
+                  filterOption={(input, option) => 
+                    ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={bookings.map(b => ({ 
+                    label: `#${b._id?.slice(0,8)}...` + 
+                      (b.checkIn && b.checkOut 
+                        ? ` (${dayjs(b.checkIn).format('DD/MM')} - ${dayjs(b.checkOut).format('DD/MM/YYYY')})` 
+                        : ''), 
+                    value: b._id 
+                  }))}
+                />
+              </Form.Item>
+            </Col>
 
-        <Form.Item name="customerId" label="Khách hàng">
-          <Select
-            showSearch
-            allowClear
-            placeholder="Chọn khách hàng"
-            loading={loadingUsers}
-            filterOption={(input, option) => ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())}
-            options={users.map(u => ({ label: u.fullName || u._id, value: u._id }))}
-          />
-        </Form.Item>
+            <Col span={24}>
+              <Form.Item 
+                name="customerId" 
+                label="Khách hàng"
+              >
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Tìm kiếm khách hàng..."
+                  loading={loadingUsers}
+                  filterOption={(input, option) => 
+                    ((option?.label as string) ?? "").toLowerCase().includes(input.toLowerCase())
+                  }
+                  options={users.map(u => ({ 
+                    label: u.fullName || `User ${u._id.slice(0,6)}...`, 
+                    value: u._id 
+                  }))}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </div>
 
-        <Form.Item name="totalAmount" label="Tổng tiền" rules={[{ required: true, message: "Nhập tổng tiền" }]}>
-          <InputNumber min={0} style={{ width: "100%" }} />
-        </Form.Item>
+        <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px', marginBottom: '12px' }}>
+          <Title level={5} style={{ marginBottom: '12px', fontSize: '14px' }}>Thông tin thanh toán</Title>
+          
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item 
+                name="totalAmount" 
+                label="Tổng tiền" 
+                rules={[{ required: true, message: "Nhập tổng tiền" }]}
+              >
+                <InputNumber 
+                  min={0} 
+                  style={{ width: '100%' }} 
+                  formatter={(value: string | number | undefined) => 
+                    `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ₫'
+                  }
+                  parser={(value: string | undefined) => 
+                    parseInt(value?.replace(/₫\s?|(,*)/g, '') || '0', 10)
+                  }
+                  placeholder="0"
+                />
+              </Form.Item>
+            </Col>
 
-        <Form.Item name="status" label="Trạng thái" rules={[{ required: true, message: "Chọn trạng thái" }]}>
-          <Select>
-            <Option value="pending">Chờ thanh toán</Option>
-            <Option value="paid">Đã thanh toán</Option>
-            <Option value="failed">Thất bại</Option>
-            <Option value="refunded">Hoàn tiền</Option>
-          </Select>
-        </Form.Item>
+            <Col span={12}>
+              <Form.Item 
+                name="status" 
+                label="Trạng thái" 
+                rules={[{ required: true, message: "Chọn trạng thái" }]}
+              >
+                <Select placeholder="Chọn trạng thái">
+                  <Option value="pending">
+                    <Tag color="orange">Chờ thanh toán</Tag>
+                  </Option>
+                  <Option value="paid">
+                    <Tag color="green">Đã thanh toán</Tag>
+                  </Option>
+                  <Option value="failed">
+                    <Tag color="red">Thất bại</Tag>
+                  </Option>
+                  <Option value="refunded">
+                    <Tag color="blue">Hoàn tiền</Tag>
+                  </Option>
+                </Select>
+              </Form.Item>
+            </Col>
 
-        <Form.Item name="issuedAt" label="Ngày phát hành">
-          <DatePicker style={{ width: "100%" }} showTime format="DD/MM/YYYY HH:mm" />
-        </Form.Item>
+            <Col span={24}>
+              <Form.Item 
+                name="issuedAt" 
+                label="Ngày phát hành"
+              >
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  showTime 
+                  format="DD/MM/YYYY HH:mm"
+                  placeholder="Chọn ngày phát hành"
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+        </div>
       </Form>
     </Modal>
   );

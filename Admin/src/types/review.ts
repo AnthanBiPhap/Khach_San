@@ -14,3 +14,12 @@ export interface ReviewItem {
   createdAt?: string;
   updatedAt?: string;
 }
+export interface SimpleRef { _id: string; name?: string; fullName?: string }
+
+export interface ReviewsFormProps {
+  open: boolean;
+  item?: ReviewItem | null;
+  onCancel: () => void;
+  onSave: (values: Partial<ReviewItem>) => Promise<void>;
+  loading?: boolean;
+}

@@ -21,3 +21,10 @@ export interface User {
     message: string;
     data: T;
   }
+  export interface UserFormProps {
+    open: boolean;
+    user: User | null;
+    onCancel: () => void;
+    onSave: (values: Partial<User>) => void;
+  }
+  
