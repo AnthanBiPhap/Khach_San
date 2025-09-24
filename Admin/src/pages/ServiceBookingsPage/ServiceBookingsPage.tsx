@@ -1,5 +1,5 @@
-import { Table, Typography, message, Button, Drawer, Descriptions, Tag } from "antd";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Table, Typography, Button, Card, Col, DatePicker, Descriptions, Form, Input, InputNumber, List, Modal, Row, Select, Space, Tag, message, Drawer } from "antd";
 import { ShoppingCartOutlined, PlusOutlined } from "@ant-design/icons";
 import type { ServiceBookingItem } from "../../types/serviceBooking";
 import { fetchServiceBookings, deleteServiceBooking } from "../../services/serviceBookings.service";
@@ -136,39 +136,139 @@ export default function ServiceBookingsPage() {
       />
 
       <Drawer
-        title={detailItem ? `Chi tiết lịch dịch vụ` : "Chi tiết lịch dịch vụ"}
+        title="Chi tiết lịch dịch vụ"
         open={openDetail}
         onClose={() => { setOpenDetail(false); setDetailItem(null); }}
         width={680}
       >
         {detailItem && (
           <Descriptions column={1} bordered size="middle">
-            {/* <Descriptions.Item label="ID">{detailItem._id}</Descriptions.Item> */}
-            <Descriptions.Item label="Dịch vụ">
-              {detailItem.serviceId?.name || detailItem.serviceId?._id || "-"}
+            <Descriptions.Item label="Dịch vụ" span={2}>
+              <div style={{ fontSize: '16px', fontWeight: 500 }}>
+                {detailItem.serviceId?.name || detailItem.serviceId?._id || "-"}
+              </div>
             </Descriptions.Item>
-            <Descriptions.Item label="Thời gian">
-              {detailItem.scheduledAt ? new Date(detailItem.scheduledAt).toLocaleString("vi-VN") : "-"}
+            
+            <Descriptions.Item label="Thời gian thực hiện">
+              {detailItem.scheduledAt ? new Date(detailItem.scheduledAt).toLocaleString("vi-VN") : "Chưa xác định"}
             </Descriptions.Item>
-            <Descriptions.Item label="Số lượng">{detailItem.quantity}</Descriptions.Item>
-            <Descriptions.Item label="Giá">
+            
+            <Descriptions.Item label="Số lượng">
+              {detailItem.quantity} {detailItem.serviceId?.unit || 'lần'}
+            </Descriptions.Item>
+            
+            <Descriptions.Item label="Đơn giá">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(detailItem.price)}
             </Descriptions.Item>
+            
+            <Descriptions.Item label="Thành tiền">
+              <span style={{ fontWeight: 500, color: '#1890ff' }}>
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
+                  .format(detailItem.price * (detailItem.quantity || 1))}
+              </span>
+            </Descriptions.Item>
+            
             <Descriptions.Item label="Trạng thái">
-              <Tag color={detailItem.status === "reserved" ? "blue" : detailItem.status === "completed" ? "green" : "red"}>
-                {detailItem.status}
+              <Tag 
+                color={
+                  detailItem.status === "reserved" ? "blue" : 
+                  detailItem.status === "completed" ? "green" : 
+                  detailItem.status === "cancelled" ? "red" : "default"
+                }
+              >
+                {detailItem.status === "reserved" ? "Đã đặt" :
+                 detailItem.status === "completed" ? "Hoàn thành" :
+                 detailItem.status === "cancelled" ? "Đã hủy" : detailItem.status}
               </Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Booking">
-              {detailItem.bookingId ? (detailItem.bookingId as any)._id || "-" : "-"}
+            
+            <Descriptions.Item label="Thông tin đặt phòng" span={2}>
+              <div style={{ marginTop: 8 }}>
+                {detailItem.bookingId ? (
+                  <div>
+                    <div>Phòng: {(detailItem.bookingId as any)?.roomId?.roomNumber || 'N/A'}</div>
+                    <div>Loại phòng: {(detailItem.bookingId as any)?.roomId?.typeId?.name || 'N/A'}</div>
+                    <div>Nhận phòng: {(detailItem.bookingId as any)?.checkIn ? new Date((detailItem.bookingId as any).checkIn).toLocaleString('vi-VN') : 'N/A'}</div>
+                    <div>Trả phòng: {(detailItem.bookingId as any)?.checkOut ? new Date((detailItem.bookingId as any).checkOut).toLocaleString('vi-VN') : 'N/A'}</div>
+                    <div>Số khách: {(detailItem.bookingId as any)?.guests || 'N/A'}</div>
+                    
+                    {/* Hiển thị danh sách dịch vụ đã đặt */}
+                    {(detailItem.bookingId as any)?.services?.length > 0 && (
+                      <div style={{ marginTop: 8 }}>
+                        <div><strong>Dịch vụ đã đặt:</strong></div>
+                        <List
+                          size="small"
+                          bordered
+                          dataSource={(detailItem.bookingId as any)?.services || []}
+                          renderItem={(service: any) => (
+                            <List.Item>
+                              <div style={{ width: '100%' }}>
+                                <div>{service.name}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span>Số lượng: {service.quantity}</span>
+                                  <span>{service.price?.toLocaleString('vi-VN')} VNĐ</span>
+                                </div>
+                              </div>
+                            </List.Item>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : 'Không có thông tin đặt phòng'}
+              </div>
             </Descriptions.Item>
-            <Descriptions.Item label="Khách hàng">
-              {detailItem.customerId ? (detailItem.customerId as any)._id || "-" : "-"}
+            
+            <Descriptions.Item label="Thông tin khách hàng" span={2}>
+              <div style={{ marginTop: 8 }}>
+                {(() => {
+                  // Lấy thông tin từ customerId (nếu có)
+                  const customer = detailItem.customerId || (detailItem.bookingId as any)?.customerId;
+                  if (customer) {
+                    return (
+                      <div>
+                        <div>Tên: {customer.fullName || 'Chưa có tên'}</div>
+                        <div>Điện thoại: {customer.phoneNumber || 'N/A'}</div>
+                        <div>Email: {customer.email || 'N/A'}</div>
+                      </div>
+                    );
+                  }
+                  
+                  // Nếu không có customerId, kiểm tra guestInfo trong booking
+                  const guestInfo = (detailItem.bookingId as any)?.guestInfo;
+                  if (guestInfo) {
+                    return (
+                      <div>
+                        <div>Tên: {guestInfo.fullName || 'Chưa có tên'}</div>
+                        <div>Số CMND/CCCD: {guestInfo.idNumber || 'N/A'}</div>
+                        <div>Tuổi: {guestInfo.age || 'N/A'}</div>
+                        <div>Điện thoại: {guestInfo.phoneNumber || 'N/A'}</div>
+                        
+                      </div>
+                    );
+                  }
+                  
+                  // Kiểm tra thông tin trực tiếp từ service booking
+                  if (detailItem.guestName || detailItem.phoneNumber) {
+                    return (
+                      <div>
+                        <div>Tên: {detailItem.guestName || 'Chưa có tên'}</div>
+                        <div>Điện thoại: {detailItem.phoneNumber || 'N/A'}</div>
+                      </div>
+                    );
+                  }
+                  
+                  // Nếu không có thông tin nào
+                  return 'Không có thông tin khách hàng';
+                })()}
+              </div>
             </Descriptions.Item>
-            <Descriptions.Item label="Tạo lúc">
+            
+            <Descriptions.Item label="Ngày tạo">
               {detailItem.createdAt ? new Date(detailItem.createdAt).toLocaleString("vi-VN") : "-"}
             </Descriptions.Item>
-            <Descriptions.Item label="Cập nhật">
+            
+            <Descriptions.Item label="Cập nhật lần cuối">
               {detailItem.updatedAt ? new Date(detailItem.updatedAt).toLocaleString("vi-VN") : "-"}
             </Descriptions.Item>
           </Descriptions>

@@ -1,16 +1,31 @@
 export interface ServiceRef {
   _id: string;
   name?: string;
+  unit?: string; // Thêm trường unit cho đơn vị tính
 }
 
 export interface BookingRef {
   _id: string;
+  roomId?: {
+    _id: string;
+    roomNumber?: string;
+    typeId?: {
+      _id: string;
+      name?: string;
+    };
+  };
+  guestInfo?: {
+    fullName?: string;
+    phoneNumber?: string;
+    email?: string;
+  };
 }
 
 export interface UserRef {
   _id: string;
   fullName?: string;
   email?: string;
+  phoneNumber?: string;
 }
 
 export interface ServiceBookingItem {
@@ -18,6 +33,8 @@ export interface ServiceBookingItem {
   bookingId?: BookingRef | null;
   serviceId?: ServiceRef | null;
   customerId?: UserRef | null;
+  guestName?: string;
+  phoneNumber?: string;
   scheduledAt: string; // ISO
   quantity: number;
   price: number;

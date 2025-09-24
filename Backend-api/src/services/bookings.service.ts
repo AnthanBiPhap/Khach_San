@@ -1,5 +1,6 @@
 import createError from "http-errors";
 import Booking from "../models/bookings.model";
+import ServiceBooking from "../models/serviceBookings.model";
 
 // Lấy tất cả booking với filter + pagination
 const getAll = async (query: any) => {
@@ -55,7 +56,7 @@ const getById = async (id: string) => {
 
 // Tạo booking mới
 const create = async (payload: any) => {
-  const { roomId, checkIn, checkOut } = payload;
+  const { roomId, checkIn, checkOut, services = [] } = payload;
 
   // check trùng phòng
   const conflict = await Booking.findOne({
@@ -79,12 +80,42 @@ const create = async (payload: any) => {
     notes: payload.notes || "",
     status: payload.status || "pending",
     specialRequests: payload.specialRequests || "",
+    services: services.map((s: any) => ({
+      serviceId: s.serviceId,
+      name: s.name,
+      price: s.price,
+      quantity: s.quantity
+    }))
   });
 
-  const savedBooking = await booking.save();
-  await savedBooking.populate("customerId", "fullName email phoneNumber");
-  await savedBooking.populate("roomId", "roomNumber typeId");
-  return savedBooking;
+  try {
+    // Lưu booking
+    const savedBooking = await booking.save();
+    
+    // Tạo các service booking nếu có
+    if (services && services.length > 0) {
+      const serviceBookings = services.map((service: any) => ({
+        bookingId: savedBooking._id,
+        serviceId: service.serviceId,
+        customerId: payload.customerId || null,
+        scheduledAt: new Date(checkIn), // Mặc định lấy thời gian check-in
+        quantity: service.quantity || 1,
+        price: service.price,
+        status: 'reserved'
+      }));
+
+      await ServiceBooking.insertMany(serviceBookings);
+    }
+
+    // Populate thông tin để trả về
+    await savedBooking.populate("customerId", "fullName email phoneNumber");
+    await savedBooking.populate("roomId", "roomNumber typeId");
+    
+    return savedBooking;
+  } catch (error) {
+    console.error('Error creating booking:', error);
+    throw error;
+  }
 };
 
 // Cập nhật booking

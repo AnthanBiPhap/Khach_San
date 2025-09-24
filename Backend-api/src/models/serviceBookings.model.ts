@@ -15,7 +15,8 @@ const serviceBookingSchema = new Schema(
     customerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Thiếu khách hàng"],
+      required: false,
+      default: null
     },
     scheduledAt: {
       type: Date,
