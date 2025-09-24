@@ -31,6 +31,14 @@ const bookingSchema = new Schema({
     required: [true, "Cần khai báo số lượng khách"],
     min: 1,
   },
+  services: [
+    {
+      serviceId: { type: Schema.Types.ObjectId, ref: "Service" },
+      name: { type: String, required: true },      
+      price: { type: Number, required: true, min: 0 }, 
+      quantity: { type: Number, default: 1, min: 1 }
+    }
+  ],
   totalPrice: {
     type: Number,
     required: [true, "Tổng tiền là bắt buộc"],

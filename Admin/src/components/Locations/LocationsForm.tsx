@@ -1,6 +1,6 @@
 import { Form, Input, Modal, Select, InputNumber, Row, Col, Typography, Tag } from "antd";
 import { useEffect } from "react";
-import type { LocationItem, LocationStatus, LocationType, LocationsFormProps } from "../../types/location";
+import type { LocationStatus, LocationType, LocationsFormProps } from "../../types/location";
 
 const { TextArea } = Input;
 const { Title } = Typography;

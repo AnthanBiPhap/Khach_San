@@ -1,18 +1,23 @@
 interface User {
   _id: string;
   fullName: string;
-  email?: string;
   phoneNumber: string;
 }
 export interface GuestInfo {
   fullName: string;
   phoneNumber: string;
-  idNumber: string; // thêm cái này
+  idNumber: string;
   age: number;
+  email?: string;
   actualCheckIn?: string;  // thêm vào
   actualCheckOut?: string; // thêm vào
 }
-
+export interface BookingService {
+  serviceId: string | { _id: string };
+  name: string;
+  price: number;
+  quantity: number;
+}
 
 export interface Booking {
   _id: string;
@@ -23,6 +28,7 @@ export interface Booking {
   checkIn: string;
   checkOut: string;
   guests: number;
+  services?: BookingService[];
   totalPrice: number;
   paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed';
   notes?: string;

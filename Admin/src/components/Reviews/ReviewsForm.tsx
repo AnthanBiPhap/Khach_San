@@ -1,6 +1,6 @@
 import { Form, Input, Modal, Select, Row, Col, Typography, Tag } from "antd";
 import { useEffect, useState } from "react";
-import type { ReviewItem, ReviewStatus, ReviewTargetType, SimpleRef, ReviewsFormProps } from "../../types/review";
+import type { ReviewStatus, ReviewTargetType, SimpleRef, ReviewsFormProps } from "../../types/review";
 import axios from "axios";
 import { StarFilled } from "@ant-design/icons";
 
