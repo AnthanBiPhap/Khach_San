@@ -33,8 +33,6 @@ export interface ServiceBookingItem {
   bookingId?: BookingRef | null;
   serviceId?: ServiceRef | null;
   customerId?: UserRef | null;
-  guestName?: string;
-  phoneNumber?: string;
   scheduledAt: string; // ISO
   quantity: number;
   price: number;
