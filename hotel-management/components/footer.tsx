@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Phone, Mail } from "lucide-react"
+import { MapPin, Phone, Mail, Facebook, MessageSquare, MessageCircle } from "lucide-react"
 
 export function Footer() {
   return (
@@ -16,7 +16,7 @@ export function Footer() {
             <div className="space-y-2">
               <div className="flex items-center text-gray-300">
                 <MapPin className="h-4 w-4 mr-2" />
-                <span className="text-sm">123 Nguyễn Huệ, Q1, TP.HCM</span>
+                <span className="text-sm">Hùng Vương, Thanh Khê, Đà Nẵng</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <Phone className="h-4 w-4 mr-2" />
@@ -83,12 +83,30 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Download */}
+          {/* Liên hệ */}
           <div>
-            <h3 className="font-semibold mb-4">Tải ứng dụng</h3>
-            <div className="space-y-3">
-              <img src="/app-store-download-button.jpg" alt="Download on App Store" className="h-10" />
-              <img src="/google-play-download-button.png" alt="Get it on Google Play" className="h-10" />
+            <h3 className="font-semibold mb-4">Kết nối với chúng tôi</h3>
+            <div className="space-y-4">
+              <div className="flex space-x-4">
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
+                   className="text-gray-300 hover:text-white transition-colors">
+                  <Facebook className="h-6 w-6" />
+                </a>
+                <a href="https://zalo.me" target="_blank" rel="noopener noreferrer"
+                   className="text-gray-300 hover:text-blue-500 transition-colors">
+                  <MessageSquare className="h-6 w-6" />
+                </a>
+                <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer"
+                   className="text-gray-300 hover:text-pink-500 transition-colors">
+                  <MessageCircle className="h-6 w-6" />
+                </a>
+              </div>
+              <div className="mt-2">
+                <p className="text-sm text-gray-300 mb-2">Hỗ trợ 24/7</p>
+                <a href="tel:0905123456" className="text-white font-medium hover:underline">
+                  0905 123 456
+                </a>
+              </div>
             </div>
           </div>
         </div>

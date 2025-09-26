@@ -125,6 +125,7 @@ const updateById = async (id: string, payload: any) => {
   const roomId = payload.roomId ?? booking.roomId;
   const checkIn = payload.checkIn ?? booking.checkIn;
   const checkOut = payload.checkOut ?? booking.checkOut;
+  const services = payload.services || booking.services || [];
 
   // check trùng phòng
   const conflict = await Booking.findOne({
@@ -135,6 +136,30 @@ const updateById = async (id: string, payload: any) => {
     checkOut: { $gt: new Date(checkIn) },
   });
   if (conflict) throw createError(400, "Phòng đã được đặt trong khoảng thời gian này");
+
+  if (payload.services) {
+    // 1. Xóa tất cả dịch vụ cũ của booking này
+    await ServiceBooking.deleteMany({ bookingId: id });
+    
+    // 2. Thêm các dịch vụ mới
+    const serviceBookings = payload.services.map((service: any) => ({
+      bookingId: id,
+      serviceId: service.serviceId,
+      customerId: payload.customerId || booking.customerId || null,
+      serviceName: service.name,
+      price: service.price,
+      quantity: service.quantity,
+      totalPrice: service.price * service.quantity,
+      bookingDate: new Date(),
+      scheduledAt: new Date(), // Sử dụng thời gian hiện tại
+      status: 'reserved', // Sử dụng giá trị hợp lệ từ enum
+      notes: service.notes || ''
+    }));
+    
+    if (serviceBookings.length > 0) {
+      await ServiceBooking.insertMany(serviceBookings);
+    }
+  }
 
   // lọc payload hợp lệ
   const cleanUpdates = Object.fromEntries(
